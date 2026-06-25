@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StreamHub Secure Generator</title>
+    <title>StreamHub Plain Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -14,9 +14,9 @@
 
     <div class="w-full max-w-xl bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl shadow-xl">
         <h2 class="text-xl font-bold mb-2 text-indigo-400 flex items-center gap-2">
-            🚀 StreamHub Native Link Generator
+            🚀 StreamHub Plain Link Generator
         </h2>
-        <p class="text-xs text-slate-400 mb-6">Create high-performance encrypted links without external library errors.</p>
+        <p class="text-xs text-slate-400 mb-6">Generate straight forward dynamic URLs without any encryption layers.</p>
 
         <div class="space-y-4">
             <div>
@@ -31,15 +31,15 @@
 
             <div>
                 <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Custom Download Name</label>
-                <input type="text" id="videoName" placeholder="Movie_Name_2026.mp4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+                <input type="text" id="videoName" placeholder="My_Video_File.mp4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
             </div>
 
-            <button onclick="generateSecureLink()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-lg cursor-pointer">
-                Generate Secure URL
+            <button onclick="generatePlainLink()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-lg cursor-pointer">
+                Generate Link
             </button>
 
             <div id="outputSection" class="hidden mt-6 pt-6 border-t border-slate-800 space-y-3">
-                <label class="block text-xs font-semibold text-emerald-400 uppercase">Your Encrypted Link:</label>
+                <label class="block text-xs font-semibold text-emerald-400 uppercase">Your Generated Link:</label>
                 <div class="flex gap-2">
                     <input type="text" id="generatedResult" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-indigo-300 focus:outline-none">
                     <button onclick="copyToClipboard()" class="bg-slate-800 hover:bg-slate-700 text-xs text-white px-4 rounded-xl transition-all cursor-pointer">Copy</button>
@@ -49,7 +49,7 @@
     </div>
 
     <script>
-        function generateSecureLink() {
+        function generatePlainLink() {
             let vercel = document.getElementById('vercelUrl').value.trim();
             const source = document.getElementById('sourceLink').value.trim();
             let name = document.getElementById('videoName').value.trim();
@@ -62,14 +62,11 @@
             if(vercel.endsWith('/')) vercel = vercel.slice(0, -1);
             if(!name.endsWith('.mp4')) name = name + '.mp4';
 
-            const dataObject = { url: source, name: name };
-            const jsonString = JSON.stringify(dataObject);
-
-            // Native Base64 Encode & URL Safe Conversion
-            const encodedData = btoa(jsonString);
-            const safeToken = encodeURIComponent(encodedData);
+            // URL safe string components
+            const safeUrl = encodeURIComponent(source);
+            const safeName = encodeURIComponent(name);
             
-            const finalLink = `${vercel}/?data=${safeToken}`;
+            const finalLink = `${vercel}/?url=${safeUrl}&name=${safeName}`;
             
             document.getElementById('generatedResult').value = finalLink;
             document.getElementById('outputSection').classList.remove('hidden');
@@ -79,7 +76,7 @@
             const copyText = document.getElementById("generatedResult");
             copyText.select();
             navigator.clipboard.writeText(copyText.value);
-            alert("Link Copied Successfully!");
+            alert("Plain Link Copied!");
         }
     </script>
 </body>
