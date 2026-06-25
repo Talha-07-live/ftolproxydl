@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamHub Secure Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #090d16; color: #e2e8f0; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-xl bg-slate-900 border border-slate-800 p-6 md:p-8 rounded-2xl shadow-xl">
+        <h2 class="text-xl font-bold mb-2 text-indigo-400 flex items-center gap-2">
+            🔐 Secure Link Generator (AES-256)
+        </h2>
+        <p class="text-xs text-slate-400 mb-6">Encrypts your original worker stream source into unreadable string.</p>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Vercel Web App URL</label>
+                <input type="text" id="vercelUrl" placeholder="https://my-player.vercel.app" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Original Video Link</label>
+                <input type="text" id="sourceLink" placeholder="https://av-f2l-bot.avbotz26.workers.dev/51505?hash=..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Custom Download Name</label>
+                <input type="text" id="videoName" placeholder="Avengers_Endgame.mp4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <button onclick="generateSecureLink()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all text-sm shadow-lg cursor-pointer">
+                Generate Encrypted App URL
+            </button>
+
+            <div id="outputSection" class="hidden mt-6 pt-6 border-t border-slate-800 space-y-3">
+                <label class="block text-xs font-semibold text-emerald-400 uppercase">Encrypted Safe Link:</label>
+                <div class="flex gap-2">
+                    <input type="text" id="generatedResult" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-indigo-300 focus:outline-none">
+                    <button onclick="copyToClipboard()" class="bg-slate-800 hover:bg-slate-700 text-xs text-white px-4 rounded-xl transition-all cursor-pointer">Copy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Secret Key (Must match the player key)
+        const SECRET_KEY = "My_Super_Secret_App_Key_2026"; 
+
+        function generateSecureLink() {
+            let vercel = document.getElementById('vercelUrl').value.trim();
+            const source = document.getElementById('sourceLink').value.trim();
+            let name = document.getElementById('videoName').value.trim();
+
+            if(!vercel || !source || !name) {
+                alert("Please fill all fields!");
+                return;
+            }
+
+            if(vercel.endsWith('/')) vercel = vercel.slice(0, -1);
+            if(!name.endsWith('.mp4')) name = name + '.mp4';
+
+            // Creating Data Object
+            const dataObject = { url: source, name: name };
+
+            // Encrypting
+            const encrypted = CryptoJS.AES.encrypt(JSON.stringify(dataObject), SECRET_KEY).toString();
+            
+            // Safe URL String
+            const finalLink = `${vercel}/?data=${encodeURIComponent(encrypted)}`;
+            
+            document.getElementById('generatedResult').value = finalLink;
+            document.getElementById('outputSection').classList.remove('hidden');
+        }
+
+        function copyToClipboard() {
+            const copyText = document.getElementById("generatedResult");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("Encrypted link copied!");
+        }
+    </script>
+</body>
+</html>
