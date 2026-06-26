@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talha Link Generator Engine (GitHub Edition)</title>
+    <title>Talha Link Generator Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -58,9 +58,12 @@
     </div>
 
     <script>
-        let activeType = "https://downloader.talha07.workers.dev/";
+        let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
         const CRYPTO_SALT = "TalhaSecureSalt2026";
+        
+        // ডোমেইন এখানে ফিক্সড করে দেওয়া হলো
+        const BASE_DOMAIN = "https://downloader.talha07.workers.dev/";
 
         function bytesToHex(bytes) {
             return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
@@ -135,14 +138,8 @@
                 return;
             }
 
-            // GitHub Pages-এর নিজস্ব ডোমেইন অটোমেটিক ডিটেক্ট করবে
-            let baseDomain = window.location.origin + window.location.pathname;
-            if (!baseDomain.endsWith("/")) {
-                baseDomain += "/";
-            }
-
             let targetUrl = activeType === "url" ? mainInputValue : mainInputValue + ".m3u8";
-            if (activeType !== "url") nameInputValue = "Live_Streaming.mp4";
+            if (activeType !== "url") nameInputValue = mainInputValue + ".m3u8";
 
             const generatedSig = await generateSignature(targetUrl, SECRET_KEY);
 
@@ -155,8 +152,8 @@
 
             const encryptedToken = await encryptPayload(payload, SECRET_KEY);
             
-            // আউটপুট লিংক শুধুমাত্র ?Talha= দিয়ে তৈরি হবে
-            const finalLink = baseDomain + "?Talha=" + encodeURIComponent(encryptedToken);
+            // আউটপুট লিংক তৈরি হবে আপনার ওয়ার্কার ডোমেইন দিয়ে
+            const finalLink = BASE_DOMAIN + "?Talha=" + encodeURIComponent(encryptedToken);
 
             document.getElementById('resultLink').value = finalLink;
             document.getElementById('resultWrapper').classList.remove('hidden');
