@@ -10,7 +10,14 @@
         body { background: #05070f; color: #f1f5f9; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4 space-y-6">
+
+    <div class="w-full max-w-lg p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 text-center shadow-lg">
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Advertisement</p>
+        <div class="w-full min-h-[90px] bg-slate-950/60 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-xs text-slate-400">
+            <span>Place Your Top Banner Ad Code Here</span>
+        </div>
+    </div>
 
     <div class="w-full max-w-lg p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 shadow-2xl shadow-purple-500/10">
         <div class="text-center mb-6">
@@ -22,10 +29,10 @@
             <div>
                 <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Stream Type</label>
                 <div class="grid grid-cols-2 gap-3">
-                    <button id="typeUrl" onclick="switchType('url')" class="py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none">
+                    <button id="typeUrl" onclick="switchType('url')" class="py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none cursor-pointer">
                         <i class="fas fa-link mr-2"></i> Custom Video URL
                     </button>
-                    <button id="typeChannel" onclick="switchType('channel')" class="py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none">
+                    <button id="typeChannel" onclick="switchType('channel')" class="py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none cursor-pointer">
                         <i class="fas fa-satellite-dish mr-2"></i> Live Channel ID
                     </button>
                 </div>
@@ -54,6 +61,13 @@
                     </button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-lg p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 text-center shadow-lg">
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Advertisement</p>
+        <div class="w-full min-h-[90px] bg-slate-950/60 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-xs text-slate-400">
+            <span>Place Your Bottom Banner Ad Code Here</span>
         </div>
     </div>
 
@@ -88,14 +102,14 @@
             const nameWrapper = document.getElementById('nameWrapper');
             
             if(type === 'url') {
-                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none";
-                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none";
+                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none cursor-pointer";
+                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none cursor-pointer";
                 inputLabel.innerText = "Video/Stream Link";
                 mainInput.placeholder = "https://example.com/video.mp4";
                 nameWrapper.style.display = "block";
             } else {
-                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 transition-all outline-none";
-                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none";
+                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 transition-all outline-none cursor-pointer";
+                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none cursor-pointer";
                 inputLabel.innerText = "Talha Channel ID";
                 mainInput.placeholder = "androstreamlivetrt1";
                 nameWrapper.style.display = "none";
