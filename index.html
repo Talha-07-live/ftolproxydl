@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talha Link Generator Engine</title>
+    <title>Talha Link Generator Engine (Secure)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,7 +15,7 @@
     <div class="w-full max-w-lg p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 shadow-2xl shadow-purple-500/10">
         <div class="text-center mb-6">
             <h2 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">TALHA ENGINE</h2>
-            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Premium Link Generator</p>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Secure Premium Link Generator</p>
         </div>
 
         <div class="space-y-5">
@@ -42,11 +42,11 @@
             </div>
 
             <button onclick="generateLink()" class="w-full py-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-95 active:scale-[0.98] transition-all shadow-lg shadow-purple-500/20 cursor-pointer outline-none">
-                <i class="fas fa-magic mr-2"></i> Generate Stream Link
+                <i class="fas fa-magic mr-2"></i> Generate Encrypted Link
             </button>
 
             <div id="resultWrapper" class="hidden space-y-2 pt-4 border-t border-white/5">
-                <label class="block text-xs font-bold tracking-wider text-emerald-400 uppercase">Generated Premium Link</label>
+                <label class="block text-xs font-bold tracking-wider text-emerald-400 uppercase">Generated Premium Secured Link</label>
                 <div class="flex gap-2">
                     <input type="text" id="resultLink" readonly class="w-full bg-slate-950/80 border border-emerald-500/20 rounded-xl px-4 py-3 text-xs text-emerald-400 outline-none">
                     <button onclick="copyLink()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 rounded-xl text-sm transition-all cursor-pointer">
@@ -60,6 +60,27 @@
     <script>
         const workerDomain = "https://test.talha07.workers.dev/";
         let activeType = "url";
+
+        // ওয়ার্কারের SECRET_KEY এর সাথে এটি হুবহু মিল থাকতে হবে
+        const SECRET_KEY = "TalhaPremiumSecureEngineV95";
+
+        // ফ্রন্টএন্ড এনক্রিপশন ফাংশন (XOR + URL Safe Base64)
+        function encryptURL(url) {
+            try {
+                // XOR Cipher
+                let ciphered = "";
+                for (let i = 0; i < url.length; i++) {
+                    ciphered += String.fromCharCode(url.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length));
+                }
+                // Base64 Encode ও URL Friendly করা (+ কে -, / কে _ করা)
+                return btoa(unescape(encodeURIComponent(ciphered)))
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+            } catch (e) {
+                return url;
+            }
+        }
 
         function switchType(type) {
             activeType = type;
@@ -97,11 +118,15 @@
             let finalLink = workerDomain;
 
             if (activeType === "url") {
-                finalLink += "?url=" + encodeURIComponent(mainInputValue);
+                // ইউআরএলটি সুরক্ষিতভাবে এনক্রিপ্ট করে প্যারামিটারে পাস করা হচ্ছে
+                const encryptedUrl = encryptURL(mainInputValue);
+                finalLink += "?url=" + encodeURIComponent(encryptedUrl);
+                
                 if(nameInputValue) {
                     finalLink += "&name=" + encodeURIComponent(nameInputValue);
                 }
             } else {
+                // চ্যানেল আইডি এনক্রিপ্ট করার প্রয়োজন নেই (যেহেতু এটি সরাসরি m3u8 প্রক্সি রিকোয়েস্ট তৈরি করে)
                 finalLink += "?Talha=" + encodeURIComponent(mainInputValue);
             }
 
