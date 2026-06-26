@@ -1,44 +1,122 @@
-<script>
-        // ⚠️ আপনার ক্লাউডফ্লেয়ার ওয়ার্কারের লিঙ্কটি নিচে বসান (শেষে স্ল্যাশ দিবেন)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talha Link Generator Engine (Full Secure)</title>
+    <!-- Tailwind v4 Core এবং FontAwesome CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #05070f; color: #f1f5f9; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 space-y-6">
+
+    <!-- Top Advertisement Banner -->
+    <div class="w-full max-w-lg p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 text-center shadow-lg">
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Advertisement</p>
+        <div class="w-full min-h-[90px] bg-slate-950/60 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-xs text-slate-400">
+            <span>Place Your Top Banner Ad Code Here</span>
+        </div>
+    </div>
+
+    <!-- Main Generator Card -->
+    <div class="w-full max-w-lg p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 shadow-2xl shadow-purple-500/10">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">TALHA ENGINE</h2>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Full Encrypted Link Generator</p>
+        </div>
+
+        <div class="space-y-5">
+            <!-- Stream Type Switcher -->
+            <div>
+                <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Stream Type</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="typeUrl" onclick="switchType('url')" class="py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none cursor-pointer">
+                        <i class="fas fa-link mr-2"></i> Custom Video URL
+                    </button>
+                    <button type="button" id="typeChannel" onclick="switchType('channel')" class="py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none cursor-pointer">
+                        <i class="fas fa-satellite-dish mr-2"></i> Live Channel ID
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Input Field -->
+            <div>
+                <label id="inputLabel" class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Video/Stream Link</label>
+                <input type="text" id="mainInput" placeholder="https://example.com/video.mp4" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all outline-none">
+            </div>
+
+            <!-- Optional Name Field -->
+            <div id="nameWrapper">
+                <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Custom File Name</label>
+                <input type="text" id="nameInput" placeholder="Action_Movie_2026" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all outline-none">
+            </div>
+
+            <!-- Action Button -->
+            <button type="button" onclick="generateLink()" class="w-full py-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-95 active:scale-[0.98] transition-all shadow-lg shadow-purple-500/20 cursor-pointer outline-none">
+                <i class="fas fa-magic mr-2"></i> Generate Encrypted Link
+            </button>
+
+            <!-- Output Result Wrapper -->
+            <div id="resultWrapper" class="hidden space-y-2 pt-4 border-t border-white/5">
+                <label class="block text-xs font-bold tracking-wider text-emerald-400 uppercase">Generated Premium Secured Link</label>
+                <div class="flex gap-2">
+                    <input type="text" id="resultLink" readonly class="w-full bg-slate-950/80 border border-emerald-500/20 rounded-xl px-4 py-3 text-xs text-emerald-400 outline-none">
+                    <button type="button" onclick="copyLink()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 rounded-xl text-sm transition-all cursor-pointer">
+                        <i id="copyIcon" class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Advertisement Banner -->
+    <div class="w-full max-w-lg p-4 rounded-2xl bg-slate-900/40 backdrop-blur-md border border-white/5 text-center shadow-lg">
+        <p class="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Advertisement</p>
+        <div class="w-full min-h-[90px] bg-slate-950/60 rounded-xl flex items-center justify-center border border-dashed border-white/10 text-xs text-slate-400">
+            <span>Place Your Bottom Banner Ad Code Here</span>
+        </div>
+    </div>
+
+    <!-- লজিক ও সিকিউরিটি স্ক্রিপ্ট -->
+    <script>
         const workerDomain = "https://downloader.talha07.workers.dev/"; 
         let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
 
-        // ব্যাকএন্ডের সাথে সামঞ্জস্যপূর্ণ AES-GCM এবং HMAC টোকেন জেনারেটর
         async function generateSecureToken(dataObj, secretKey) {
-            const encoder = new TextEncoder();
-            const text = JSON.stringify(dataObj);
-            
-            // ১. AES-GCM কী (Key) প্রস্তুতকরণ
-            const paddedKey = secretKey.padEnd(32).substring(0, 32);
-            const keyData = encoder.encode(paddedKey);
-            const aesKey = await crypto.subtle.importKey("raw", keyData, "AES-GCM", false, ["encrypt"]);
-            
-            // ২. IV জেনারেশন এবং এনক্রিপশন
-            const iv = crypto.getRandomValues(new Uint8Array(12));
-            const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, encoder.encode(text));
-            
-            // ৩. IV এবং এনক্রিপ্টেড ডাটা কম্বাইন করা
-            const fullBuffer = new Uint8Array(iv.length + encryptedBuffer.byteLength);
-            fullBuffer.set(iv);
-            fullBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
-            
-            // ৪. এনক্রিপ্টেড ডাটাকে URL Safe Base64-এ রূপান্তর
-            const encryptedText = btoa(String.fromCharCode(...fullBuffer))
-                .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-            
-            // ৫. HMAC সিগনেচার তৈরি (Tamper Protection)
-            const hmacKeyData = encoder.encode(secretKey);
-            const hmacKey = await crypto.subtle.importKey("raw", hmacKeyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-            const signatureBuffer = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(encryptedText));
-            const signature = Array.from(new Uint8Array(signatureBuffer))
-                .map(b => b.toString(16).padStart(2, "0")).join("").substring(0, 10);
-            
-            // ৬. টোকেন ফরম্যাট: EncryptedData.Signature
-            const finalRawToken = encryptedText + "." + signature;
-            
-            // ৭. পুরো টোকেনকে আবার URL Safe Base64 করা যাতে একটি নিট সিঙ্গেল প্যারামিটার পাওয়া যায়
-            return btoa(finalRawToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            try {
+                const encoder = new TextEncoder();
+                const text = JSON.stringify(dataObj);
+                
+                const paddedKey = secretKey.padEnd(32).substring(0, 32);
+                const keyData = encoder.encode(paddedKey);
+                const aesKey = await crypto.subtle.importKey("raw", keyData, "AES-GCM", false, ["encrypt"]);
+                
+                const iv = crypto.getRandomValues(new Uint8Array(12));
+                const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, aesKey, encoder.encode(text));
+                
+                const fullBuffer = new Uint8Array(iv.length + encryptedBuffer.byteLength);
+                fullBuffer.set(iv);
+                fullBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
+                
+                const encryptedText = btoa(String.fromCharCode.apply(null, fullBuffer))
+                    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+                
+                const hmacKeyData = encoder.encode(secretKey);
+                const hmacKey = await crypto.subtle.importKey("raw", hmacKeyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+                const signatureBuffer = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(encryptedText));
+                const signature = Array.from(new Uint8Array(signatureBuffer))
+                    .map(b => b.toString(16).padStart(2, "0")).join("").substring(0, 10);
+                
+                const finalRawToken = encryptedText + "." + signature;
+                return btoa(finalRawToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            } catch (e) {
+                console.error(e);
+                throw new Error("Encryption process failed.");
+            }
         }
 
         function switchType(type) {
@@ -74,24 +152,20 @@
                 return;
             }
 
-            // ব্যাকএন্ডের জন্য অবজেক্ট পে-লোড স্ট্রাকচার তৈরি
             let payload = {
-                d: mainInputValue,           // data (url or channel id)
-                t: activeType,               // type (url or channel)
-                n: nameInputValue || ""      // custom filename
+                d: mainInputValue,
+                t: activeType,
+                n: nameInputValue || ""
             };
 
             try {
-                // টোকেন জেনারেট করা হচ্ছে
                 const secureToken = await generateSecureToken(payload, SECRET_KEY);
-                
-                // নতুন রুলস অনুযায়ী ফাইনাল আউটপুট লিংক তৈরি
                 let finalLink = workerDomain + "?Talha=" + encodeURIComponent(secureToken);
 
                 document.getElementById('resultLink').value = finalLink;
                 document.getElementById('resultWrapper').classList.remove('hidden');
             } catch (error) {
-                alert("Encryption Failed: " + error.message);
+                alert("Error: " + error.message);
             }
         }
 
@@ -104,3 +178,5 @@
             setTimeout(() => { icon.className = "fas fa-copy"; }, 2000);
         }
     </script>
+</body>
+</html>
