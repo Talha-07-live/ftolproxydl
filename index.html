@@ -3,76 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cineplex Link Structurer</title>
+    <title>Talha Link Generator Engine</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: #07090e; color: #e2e8f0; }
+        body { background: #05070f; color: #f1f5f9; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div class="w-full max-w-xl bg-slate-900/60 border border-slate-800 p-6 md:p-8 rounded-3xl shadow-2xl backdrop-blur-md">
-        <h2 class="text-xl font-bold mb-1 text-pink-500 flex items-center gap-2">
-            ⚙️ Cineplex Stream Optimizer
-        </h2>
-        <p class="text-xs text-slate-400 mb-6">Converts raw worker configurations into high-performance web app streams.</p>
+    <div class="w-full max-w-lg p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 shadow-2xl shadow-purple-500/10">
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">TALHA ENGINE</h2>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Premium Link Generator</p>
+        </div>
 
         <div class="space-y-5">
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Vercel Live App URL</label>
-                <input type="text" id="vercelUrl" value="https://ftolproxy.vercel.app" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-pink-500">
+                <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Stream Type</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="typeUrl" onclick="switchType('url')" class="py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none">
+                        <i class="fas fa-link mr-2"></i> Custom Video URL
+                    </button>
+                    <button id="typeChannel" onclick="switchType('channel')" class="py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none">
+                        <i class="fas fa-satellite-dish mr-2"></i> Live Channel ID
+                    </button>
+                </div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Raw Video Source Link</label>
-                <input type="text" id="sourceLink" placeholder="https://av-f2l-bot.avbotz26.workers.dev/51505?hash=..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-pink-500">
+                <label id="inputLabel" class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Video/Stream Link</label>
+                <input type="text" id="mainInput" placeholder="https://example.com/video.mp4" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all outline-none">
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Custom App Title Name</label>
-                <input type="text" id="videoName" placeholder="Avatar_The_Way_Of_Water.mp4" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-pink-500">
+            <div id="nameWrapper">
+                <label class="block text-xs font-bold tracking-wider text-slate-400 uppercase mb-2">Custom File Name</label>
+                <input type="text" id="nameInput" placeholder="Action_Movie_2026" class="w-full bg-slate-950 border border-white/10 rounded-xl px-4 py-3.5 text-sm text-white placeholder-slate-600 focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 transition-all outline-none">
             </div>
 
-            <button onclick="generateOptimizedLink()" class="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-3.5 rounded-xl transition-all text-sm shadow-lg cursor-pointer">
-                Inject & Build Optimized Link
+            <button onclick="generateLink()" class="w-full py-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-purple-600 to-cyan-500 hover:opacity-95 active:scale-[0.98] transition-all shadow-lg shadow-purple-500/20 cursor-pointer outline-none">
+                <i class="fas fa-magic mr-2"></i> Generate Stream Link
             </button>
 
-            <div id="outputSection" class="hidden mt-6 pt-6 border-t border-slate-800 space-y-3">
-                <label class="block text-xs font-semibold text-emerald-400 uppercase">Production Ready App URL:</label>
+            <div id="resultWrapper" class="hidden space-y-2 pt-4 border-t border-white/5">
+                <label class="block text-xs font-bold tracking-wider text-emerald-400 uppercase">Generated Premium Link</label>
                 <div class="flex gap-2">
-                    <input type="text" id="generatedResult" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-xs text-pink-400 focus:outline-none">
-                    <button onclick="copyToClipboard()" class="bg-slate-800 hover:bg-slate-700 text-xs text-white px-5 rounded-xl transition-all cursor-pointer border border-slate-700">Copy</button>
+                    <input type="text" id="resultLink" readonly class="w-full bg-slate-950/80 border border-emerald-500/20 rounded-xl px-4 py-3 text-xs text-emerald-400 outline-none">
+                    <button onclick="copyLink()" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-4 rounded-xl text-sm transition-all cursor-pointer">
+                        <i id="copyIcon" class="fas fa-copy"></i>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        function generateOptimizedLink() {
-            let vercel = document.getElementById('vercelUrl').value.trim();
-            const source = document.getElementById('sourceLink').value.trim();
-            let name = document.getElementById('videoName').value.trim();
+        const workerDomain = "https://test.talha07.workers.dev/";
+        let activeType = "url";
 
-            if(!vercel || !source || !name) {
-                alert("All setup configurations must be filled!");
+        function switchType(type) {
+            activeType = type;
+            const btnUrl = document.getElementById('typeUrl');
+            const btnChannel = document.getElementById('typeChannel');
+            const inputLabel = document.getElementById('inputLabel');
+            const mainInput = document.getElementById('mainInput');
+            const nameWrapper = document.getElementById('nameWrapper');
+            
+            if(type === 'url') {
+                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-purple-500/30 bg-purple-500/10 text-purple-400 transition-all outline-none";
+                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none";
+                inputLabel.innerText = "Video/Stream Link";
+                mainInput.placeholder = "https://example.com/video.mp4";
+                nameWrapper.style.display = "block";
+            } else {
+                btnChannel.className = "py-3 rounded-xl font-bold text-sm border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 transition-all outline-none";
+                btnUrl.className = "py-3 rounded-xl font-bold text-sm border border-white/5 bg-slate-800/40 text-slate-400 transition-all outline-none";
+                inputLabel.innerText = "Talha Channel ID";
+                mainInput.placeholder = "androstreamlivetrt1";
+                nameWrapper.style.display = "none";
+            }
+            document.getElementById('resultWrapper').classList.add('hidden');
+        }
+
+        function generateLink() {
+            const mainInputValue = document.getElementById('mainInput').value.trim();
+            const nameInputValue = document.getElementById('nameInput').value.trim();
+            
+            if(!mainInputValue) {
+                alert("Please fill up the input field!");
                 return;
             }
 
-            if(vercel.endsWith('/')) vercel = vercel.slice(0, -1);
-            if(!name.endsWith('.mp4')) name = name + '.mp4';
+            let finalLink = workerDomain;
 
-            const finalLink = `${vercel}/?url=${encodeURIComponent(source)}&name=${encodeURIComponent(name)}`;
-            
-            document.getElementById('generatedResult').value = finalLink;
-            document.getElementById('outputSection').classList.remove('hidden');
+            if (activeType === "url") {
+                finalLink += "?url=" + encodeURIComponent(mainInputValue);
+                if(nameInputValue) {
+                    finalLink += "&name=" + encodeURIComponent(nameInputValue);
+                }
+            } else {
+                finalLink += "?Talha=" + encodeURIComponent(mainInputValue);
+            }
+
+            document.getElementById('resultLink').value = finalLink;
+            document.getElementById('resultWrapper').classList.remove('hidden');
         }
 
-        function copyToClipboard() {
-            const copyText = document.getElementById("generatedResult");
-            copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("Stream link copied safely!");
+        function copyLink() {
+            const linkInput = document.getElementById('resultLink');
+            linkInput.select();
+            document.execCommand('copy');
+            
+            const icon = document.getElementById('copyIcon');
+            icon.className = "fas fa-check";
+            setTimeout(() => {
+                icon.className = "fas fa-copy";
+            }, 2000);
         }
     </script>
 </body>
