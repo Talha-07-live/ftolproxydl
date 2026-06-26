@@ -63,7 +63,17 @@
         let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
 
-        // ব্যাকএন্ডের সাথে ম্যাচিং স্ট্রং AES-GCM এনক্রিপশন মেকানিজম
+        // ১. ব্যাকএন্ডের সাথে ম্যাচিং ক্রিপ্টোগ্রাফিক্যালি স্ট্রং HMAC মেকানিজম (নতুন যুক্ত করা হয়েছে)
+        async function generateSignature(url, secretKey) {
+            const encoder = new TextEncoder();
+            const keyData = encoder.encode(secretKey);
+            const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+            const data = encoder.encode(url);
+            const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, data);
+            return Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+        }
+
+        // ২. ব্যাকএন্ডের সাথে ম্যাচিং স্ট্রং AES-GCM এনক্রিপশন মেকানিজম
         async function encryptPayload(payloadObj, secretKey) {
             const encoder = new TextEncoder();
             const data = encoder.encode(JSON.stringify(payloadObj));
@@ -109,7 +119,7 @@
 
         async function generateLink() {
             const mainInputValue = document.getElementById('mainInput').value.trim();
-            const nameInputValue = document.getElementById('nameInput').value.trim() || "Premium_Video.mp4";
+            let nameInputValue = document.getElementById('nameInput').value.trim() || "Premium_Video.mp4";
             
             if(!mainInputValue) {
                 alert("Please fill up the input field!");
@@ -117,24 +127,30 @@
             }
 
             let finalLink = workerDomain;
+            let targetUrl = "";
 
-            // অবজেক্ট স্ট্রাকচার তৈরি করে পুরো ডাটা একসাথে AES-GCM দিয়ে এনক্রিপ্ট করা হচ্ছে
+            // সঠিক ইউআরএল ফরমেট নির্ধারণ করা
             if (activeType === "url") {
-                const payload = {
-                    url: mainInputValue,
-                    name: nameInputValue
-                };
-                const encryptedToken = await encryptPayload(payload, SECRET_KEY);
-                finalLink += "?Talha=" + encodeURIComponent(encryptedToken);
+                targetUrl = mainInputValue;
             } else {
-                // লাইভ চ্যানেল আইডির জন্য ওল্ড মেথড বা ফিক্সড অবজেক্ট মেথড
-                const payload = {
-                    url: mainInputValue + ".m3u8",
-                    name: "Live_Streaming.mp4"
-                };
-                const encryptedToken = await encryptPayload(payload, SECRET_KEY);
-                finalLink += "?Talha=" + encodeURIComponent(encryptedToken);
+                targetUrl = mainInputValue + ".m3u8";
+                nameInputValue = "Live_Streaming.mp4";
             }
+
+            // ব্যাকএন্ডের রিকোয়েস্ট অনুযায়ী HMAC SHA-256 সিগনেচার জেনারেট করা
+            const generatedSig = await generateSignature(targetUrl, SECRET_KEY);
+
+            // নতুন রিকোয়ার্ড স্ট্রাকচার: [url, name, ts, sig] সবগুলো একসাথে পাঠানো হচ্ছে
+            const payload = {
+                url: targetUrl,
+                name: nameInputValue,
+                ts: Date.now(),
+                sig: generatedSig
+            };
+
+            // সম্পূর্ণ JSON অবজেক্টটিকে AES-GCM দিয়ে এনক্রিপ্ট করা
+            const encryptedToken = await encryptPayload(payload, SECRET_KEY);
+            finalLink += "?Talha=" + encodeURIComponent(encryptedToken);
 
             document.getElementById('resultLink').value = finalLink;
             document.getElementById('resultWrapper').classList.remove('hidden');
