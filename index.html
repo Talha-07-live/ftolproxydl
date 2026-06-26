@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Talha Link Generator Engine (Secure)</title>
+    <title>Talha Link Generator Engine (Full Secure)</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -15,7 +15,7 @@
     <div class="w-full max-w-lg p-8 rounded-3xl bg-slate-900/50 backdrop-blur-xl border border-white/5 shadow-2xl shadow-purple-500/10">
         <div class="text-center mb-6">
             <h2 class="text-2xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400">TALHA ENGINE</h2>
-            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Secure Premium Link Generator</p>
+            <p class="text-xs text-slate-400 uppercase tracking-widest mt-1">Full Encrypted Link Generator</p>
         </div>
 
         <div class="space-y-5">
@@ -60,25 +60,21 @@
     <script>
         const workerDomain = "https://test.talha07.workers.dev/";
         let activeType = "url";
-
-        // ওয়ার্কারের SECRET_KEY এর সাথে এটি হুবহু মিল থাকতে হবে
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
 
-        // ফ্রন্টএন্ড এনক্রিপশন ফাংশন (XOR + URL Safe Base64)
-        function encryptURL(url) {
+        // URL Safe Base64 Encryption Function
+        function encryptURL(str) {
             try {
-                // XOR Cipher
                 let ciphered = "";
-                for (let i = 0; i < url.length; i++) {
-                    ciphered += String.fromCharCode(url.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length));
+                for (let i = 0; i < str.length; i++) {
+                    ciphered += String.fromCharCode(str.charCodeAt(i) ^ SECRET_KEY.charCodeAt(i % SECRET_KEY.length));
                 }
-                // Base64 Encode ও URL Friendly করা (+ কে -, / কে _ করা)
                 return btoa(unescape(encodeURIComponent(ciphered)))
                     .replace(/\+/g, '-')
                     .replace(/\//g, '_')
                     .replace(/=+$/, '');
             } catch (e) {
-                return url;
+                return str;
             }
         }
 
@@ -118,15 +114,15 @@
             let finalLink = workerDomain;
 
             if (activeType === "url") {
-                // ইউআরএলটি সুরক্ষিতভাবে এনক্রিপ্ট করে প্যারামিটারে পাস করা হচ্ছে
+                // ইউআরএল এবং ফাইল নেম উভয়ই এনক্রিপ্ট করা হচ্ছে
                 const encryptedUrl = encryptURL(mainInputValue);
                 finalLink += "?url=" + encodeURIComponent(encryptedUrl);
                 
                 if(nameInputValue) {
-                    finalLink += "&name=" + encodeURIComponent(nameInputValue);
+                    const encryptedName = encryptURL(nameInputValue);
+                    finalLink += "&name=" + encodeURIComponent(encryptedName);
                 }
             } else {
-                // চ্যানেল আইডি এনক্রিপ্ট করার প্রয়োজন নেই (যেহেতু এটি সরাসরি m3u8 প্রক্সি রিকোয়েস্ট তৈরি করে)
                 finalLink += "?Talha=" + encodeURIComponent(mainInputValue);
             }
 
@@ -138,12 +134,9 @@
             const linkInput = document.getElementById('resultLink');
             linkInput.select();
             document.execCommand('copy');
-            
             const icon = document.getElementById('copyIcon');
             icon.className = "fas fa-check";
-            setTimeout(() => {
-                icon.className = "fas fa-copy";
-            }, 2000);
+            setTimeout(() => { icon.className = "fas fa-copy"; }, 2000);
         }
     </script>
 </body>
