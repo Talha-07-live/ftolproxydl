@@ -58,7 +58,8 @@
     </div>
 
     <script>
-        const workerDomain = "https://test.talha07.workers.dev/";
+        // ⚠️ আপনার ক্লাউডফ্লেয়ার ওয়ার্কারের লিঙ্কটি নিচে বসান (শেষে স্ল্যাশ দিবেন)
+        const workerDomain = "https://test.talha07.workers.dev/"; 
         let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
 
@@ -114,7 +115,6 @@
             let finalLink = workerDomain;
 
             if (activeType === "url") {
-                // ইউআরএল এবং ফাইল নেম উভয়ই এনক্রিপ্ট করা হচ্ছে
                 const encryptedUrl = encryptURL(mainInputValue);
                 finalLink += "?url=" + encodeURIComponent(encryptedUrl);
                 
