@@ -62,35 +62,48 @@
         const workerDomain = "https://downloader.talha07.workers.dev/"; 
         let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
+        const CRYPTO_SALT = "TalhaSecureSalt2026";
 
-        // ১. ব্যাকএন্ডের সাথে ম্যাচিং ক্রিপ্টোগ্রাফিক্যালি স্ট্রং HMAC মেকানিজম (নতুন যুক্ত করা হয়েছে)
-        async function generateSignature(url, secretKey) {
-            const encoder = new TextEncoder();
-            const keyData = encoder.encode(secretKey);
-            const cryptoKey = await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-            const data = encoder.encode(url);
-            const signatureBuffer = await crypto.subtle.sign("HMAC", cryptoKey, data);
-            return Array.from(new Uint8Array(signatureBuffer)).map(b => b.toString(16).padStart(2, "0")).join("");
+        function bytesToHex(bytes) {
+            return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
         }
 
-        // ২. ব্যাকএন্ডের সাথে ম্যাচিং স্ট্রং AES-GCM এনক্রিপশন মেকানিজম
+        async function getCryptoKeys(secret) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(secret), { name: "PBKDF2" }, false, ["deriveKey"]);
+            const salt = enc.encode(CRYPTO_SALT);
+            const aesKey = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["encrypt"]);
+            const hmacKey = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 1000, hash: "SHA-256" }, keyMaterial, { name: "HMAC", hash: "SHA-256", length: 256 }, false, ["sign"]);
+            return { aesKey, hmacKey };
+        }
+
+        // ১. ব্যাকএন্ডের সাথে ম্যাচিং ক্রিপ্টোগ্রাফিক্যালি স্ট্রং HMAC মেকানিজম
+        async function generateSignature(url, secretKey) {
+            const encoder = new TextEncoder();
+            const { hmacKey } = await getCryptoKeys(secretKey);
+            const signatureBuffer = await crypto.subtle.sign("HMAC", hmacKey, encoder.encode(url));
+            return bytesToHex(new Uint8Array(signatureBuffer));
+        }
+
+        // ২. ব্যাকএন্ডের সাথে ম্যাচিং স্ট্রং AES-GCM এবং HMAC কম্বাইন্ড টোকেন জেনারেটর মেকানিজম
         async function encryptPayload(payloadObj, secretKey) {
             const encoder = new TextEncoder();
             const data = encoder.encode(JSON.stringify(payloadObj));
-            const keyData = encoder.encode(secretKey.padEnd(32)).slice(0, 32);
+            const { aesKey, hmacKey } = await getCryptoKeys(secretKey);
             
-            const cryptoKey = await crypto.subtle.importKey("raw", keyData, "AES-GCM", false, ["encrypt"]);
             const iv = crypto.getRandomValues(new Uint8Array(12));
-            const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, cryptoKey, data);
+            const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aesKey, data);
             
             const fullBuffer = new Uint8Array(iv.length + encryptedBuffer.byteLength);
             fullBuffer.set(iv);
             fullBuffer.set(new Uint8Array(encryptedBuffer), iv.length);
             
-            return btoa(String.fromCharCode(...fullBuffer))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
+            const signatureBuffer = await crypto.subtle.sign("HMAC", hmacKey, fullBuffer);
+            
+            const encryptedHex = bytesToHex(fullBuffer);
+            const signatureHex = bytesToHex(new Uint8Array(signatureBuffer));
+            
+            return encryptedHex + "." + signatureHex;
         }
 
         function switchType(type) {
@@ -140,15 +153,15 @@
             // ব্যাকএন্ডের রিকোয়েস্ট অনুযায়ী HMAC SHA-256 সিগনেচার জেনারেট করা
             const generatedSig = await generateSignature(targetUrl, SECRET_KEY);
 
-            // নতুন রিকোয়ার্ড স্ট্রাকচার: [url, name, ts, sig] সবগুলো একসাথে পাঠানো হচ্ছে
+            // নতুন রিকোয়ার্ড স্ট্রাকচার: ব্যাকএন্ডের ভেরিয়েবল নেম ম্যাচিং করে ডাটা সাজানো
             const payload = {
-                url: targetUrl,
-                name: nameInputValue,
+                rawUrl: targetUrl,
+                rawName: nameInputValue,
                 ts: Date.now(),
                 sig: generatedSig
             };
 
-            // সম্পূর্ণ JSON অবজেক্টটিকে AES-GCM দিয়ে এনক্রিপ্ট করা
+            // সম্পূর্ণ JSON অবজেক্টটিকে AES-GCM দিয়ে এনক্রিপ্ট করা
             const encryptedToken = await encryptPayload(payload, SECRET_KEY);
             finalLink += "?Talha=" + encodeURIComponent(encryptedToken);
 
