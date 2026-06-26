@@ -68,28 +68,28 @@
     </div>
 
     <script>
+        // ⚠️ আপনার ক্লাউডফ্লেয়ার ওয়ার্কারের লিঙ্কটি নিচে বসান
         const workerDomain = "https://downloader.talha07.workers.dev/"; 
         let activeType = "url";
         const SECRET_KEY = "TalhaPremiumSecureEngineV95";
 
-        // Advanced Tamper-Proof & Short Encryption Function
+        // শর্ট এনক্রিপশন এবং অ্যান্টি-টেম্পার সিগনেচার মেকার
         function secureEncrypt(mainValue, type) {
-            // ১. ডেটার সাথে টাইপ যুক্ত করে অবজেক্ট তৈরি (যাতে শর্ট হয়)
+            // ডাটা সাইজ ছোট করার জন্য অবজেক্ট
             const payload = JSON.stringify({ d: mainValue, t: type });
             
-            // ২. AES দিয়ে এনক্রিপ্ট করা (যাতে কেউ ডিক্রিপ্ট করতে না পারে)
+            // AES এনক্রিপশন
             const encrypted = CryptoJS.AES.encrypt(payload, SECRET_KEY).toString();
             
-            // ৩. এনক্রিপ্টেড ডেটার উপর বেস করে একটি নির্দিষ্ট Signature (হ্যাস) তৈরি করা
+            // টেম্পারিং আটকানোর জন্য সিগনেচার হ্যাশ তৈরি (প্রথম ৮ অক্ষর)
             const hash = CryptoJS.HmacMD5(encrypted, SECRET_KEY).toString(CryptoJS.enc.Hex).substring(0, 8);
             
-            // ৪. ডেটা + সিগনেচার কম্বাইন করে ইউজার ফ্রেন্ডলি শর্ট বেস৬৪ করা
-            const finalString = btoa(encrypted + "." + hash)
+            // এনক্রিপশন ডেটা ও সিগনেচার যুক্ত করে URL Safe Base64 করা
+            const rawToken = encrypted + "." + hash;
+            return btoa(rawToken)
                 .replace(/\+/g, '-')
                 .replace(/\//g, '_')
                 .replace(/=+$/, '');
-                
-            return finalString;
         }
 
         function switchType(type) {
@@ -115,16 +115,12 @@
 
         function generateLink() {
             const mainInputValue = document.getElementById('mainInput').value.trim();
-            
             if(!mainInputValue) {
                 alert("Please fill up the input field!");
                 return;
             }
 
-            // শর্ট সিকিউরড টোকেন তৈরি
             const encryptedData = secureEncrypt(mainInputValue, activeType);
-            
-            // ফাইনাল আউটপুট লিংক স্ট্রাকচার: ?Talha=...
             const finalLink = workerDomain + "?Talha=" + encodeURIComponent(encryptedData);
 
             document.getElementById('resultLink').value = finalLink;
